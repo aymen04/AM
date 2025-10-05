@@ -2,7 +2,7 @@ services:
   - type: web
     name: backend
     env: node
-    plan: free
+    plan: starter
     buildCommand: npm install
     startCommand: node backend/index.js
     envVars:
@@ -11,9 +11,9 @@ services:
           name: ams-db
           property: connectionString
 
-  - type: web
+  - type: static
     name: frontend
     env: static
-    plan: free
+    plan: starter
     buildCommand: npm install && npm run build
     staticPublishPath: dist
