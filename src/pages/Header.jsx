@@ -20,34 +20,28 @@ export default function Header({ isAdmin, products }) {
   // Extraire les catégories uniques des produits
   const categories = [
     {
-      name: 'Colliers',
-      slug: 'Collier',
+      name: 'collier',
+      slug: 'collier',
       image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=300&h=300&fit=crop',
-      count: products.filter(p => p.category === 'Collier').length
+      count: products.filter(p => p.category === 'collier').length
     },
     {
-      name: 'Bracelets',
-      slug: 'Bracelet',
+      name: 'bracelet',
+      slug: 'bracelet',
       image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=300&h=300&fit=crop',
-      count: products.filter(p => p.category === 'Bracelet').length
+      count: products.filter(p => p.category === 'bracelet').length
     },
     {
-      name: 'Bagues',
-      slug: 'Bague',
-      image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300&h=300&fit=crop',
-      count: products.filter(p => p.category === 'Bague').length
-    },
-    {
-      name: 'Boucles d\'oreilles',
-      slug: 'Boucles d\'oreilles',
+      name: 'boucle d\'oreille',
+      slug: 'boucle d\'oreille',
       image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=300&h=300&fit=crop',
-      count: products.filter(p => p.category === 'Boucles d\'oreilles').length
+      count: products.filter(p => p.category === 'boucle d\'oreille').length
     },
     {
-      name: 'Pendentifs',
-      slug: 'Pendentifs',
+      name: 'pendentif',
+      slug: 'pendentif',
       image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop',
-      count: products.filter(p => p.category === 'Pendentifs').length
+      count: products.filter(p => p.category === 'pendentif').length
     }
   ];
 

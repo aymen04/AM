@@ -41,10 +41,20 @@ export default function AdminPanel({ products, setProducts }) {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
         
+        const normalizeCategory = (cat) => {
+          if (!cat) return '';
+          const c = cat.toLowerCase().trim();
+          if (c.includes('collier')) return 'collier';
+          if (c.includes('bracelet')) return 'bracelet';
+          if (c.includes('boucle d\'oreille') || c.includes('boucles d\'oreilles')) return 'boucle d\'oreille';
+          if (c.includes('pendentif') || c.includes('pendentifs')) return 'pendentif';
+          return '';
+        };
+
         const importedProducts = jsonData.map((row) => ({
           name: row.Nom || row.nom || row.name || row.Name || '',
           price: row.Prix || row.prix || row.price || row.Price || '',
-          category: row.Categorie || row.categorie || row.Category || row.category || '',
+          category: normalizeCategory(row.Categorie || row.categorie || row.Category || row.category || ''),
           description: row.Description || row.description || row.Desc || row.desc || '',
           image: row.Image || row.image || row.ImageURL || row.imageURL || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop'
         })).filter(p => p.name && p.price);
@@ -86,6 +96,16 @@ export default function AdminPanel({ products, setProducts }) {
   };
 
   // Ajouter un produit manuellement
+  const normalizeCategory = (cat) => {
+    if (!cat) return '';
+    const c = cat.toLowerCase().trim();
+    if (c.includes('collier')) return 'collier';
+    if (c.includes('bracelet')) return 'bracelet';
+    if (c.includes('boucle d\'oreille') || c.includes('boucles d\'oreilles')) return 'boucle d\'oreille';
+    if (c.includes('pendentif') || c.includes('pendentifs')) return 'pendentif';
+    return '';
+  };
+
   const handleAddProduct = async () => {
     if (!name || !price) {
       alert('⚠️ Veuillez remplir au moins le nom et le prix');
@@ -95,6 +115,8 @@ export default function AdminPanel({ products, setProducts }) {
     const newProduct = {
       name,
       price,
+      category: normalizeCategory(category),
+      description,
       image: image || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop'
     };
 
@@ -269,10 +291,10 @@ export default function AdminPanel({ products, setProducts }) {
                     className="w-full bg-black border border-zinc-700 text-white px-6 py-4 rounded-lg focus:outline-none focus:border-[#ebc280] transition-colors"
                   >
                     <option value="">Sélectionner...</option>
-                    <option value="Collier">Collier</option>
-                    <option value="Bracelet">Bracelet</option>
-                    <option value="Bague">Bague</option>
-                    <option value="Boucles d'oreilles">Boucles d'oreilles</option>
+                    <option value="collier">Collier</option>
+                    <option value="bracelet">Bracelet</option>
+                    <option value="boucle d'oreille">Boucle d'oreille</option>
+                    <option value="pendentif">Pendentif</option>
                   </select>
                 </div>
                 <div>

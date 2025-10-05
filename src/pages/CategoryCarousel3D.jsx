@@ -8,35 +8,28 @@ export default function CategoryCarousel3D() {
   const categories = [
     {
       id: 1,
-      name: 'Colliers',
+      name: 'collier',
       image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&h=600&fit=crop',
       count: '12 créations',
       description: 'Élégance autour du cou'
     },
     {
       id: 2,
-      name: 'Bracelets',
+      name: 'bracelet',
       image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&h=600&fit=crop',
       count: '18 créations',
       description: 'Sublimez vos poignets'
     },
     {
       id: 3,
-      name: 'Bagues',
-      image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&h=600&fit=crop',
-      count: '24 créations',
-      description: 'Bijoux de caractère'
-    },
-    {
-      id: 4,
-      name: 'Boucles d\'oreilles',
+      name: 'boucle d\'oreille',
       image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&h=600&fit=crop',
       count: '15 créations',
       description: 'Lumière et raffinement'
     },
     {
-      id: 5,
-      name: 'Pendentifs',
+      id: 4,
+      name: 'pendentif',
       image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=600&fit=crop',
       count: '8 créations',
       description: 'Grâce et spiritualité'

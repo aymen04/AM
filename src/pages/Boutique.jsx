@@ -17,12 +17,24 @@ export default function Boutique({ products }) {
   });
   const uniqueProducts = Array.from(uniqueProductsMap.values());
 
-  // Extraire les catégories uniques
-  const categories = ['Tous', ...new Set(uniqueProducts.map(p => p.category).filter(Boolean))];
+  // Normalize categories for filters
+  const normalizeCategory = (cat) => {
+    if (!cat) return '';
+    const c = cat.toLowerCase().trim();
+    if (c.includes('collier') || c.includes('choker')) return 'collier';
+    if (c.includes('bracelet') || c.includes('chaine')) return 'bracelet';
+    if (c.includes('boucle d\'oreille') || c.includes('boucles d\'oreilles')) return 'boucle d\'oreille';
+    if (c.includes('pendentif') || c.includes('pendentifs')) return 'pendentif';
+    // Return original category if no match to keep other categories
+    return cat.trim();
+  };
+
+  // Catégories fixes pour les filtres
+  const categories = ['Tous', 'collier', 'bracelet', 'boucle d\'oreille', 'pendentif'];
 
   // Filtrer les produits
   const filteredProducts = uniqueProducts.filter(product => {
-    const matchCategory = selectedCategory === 'Tous' || product.category === selectedCategory;
+    const matchCategory = selectedCategory === 'Tous' || normalizeCategory(product.category) === selectedCategory;
     const matchSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchCategory && matchSearch;
   });
