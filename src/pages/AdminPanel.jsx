@@ -11,6 +11,7 @@ export default function AdminPanel({ products, setProducts }) {
   const [stock, setStock] = useState('');
   const [image, setImage] = useState('');
   const [imageFile, setImageFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // Gérer le changement d'image (upload local)
   const handleImageChange = (e) => {
@@ -26,7 +27,7 @@ export default function AdminPanel({ products, setProducts }) {
   };
 
   // Importer depuis Excel
-  const handleExcelImport = (e) => {
+  const handleExcelImport = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -40,18 +41,16 @@ export default function AdminPanel({ products, setProducts }) {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
         
-        const importedProducts = jsonData.map((row, index) => ({
-          id: Date.now() + index,
+        const importedProducts = jsonData.map((row) => ({
           name: row.Nom || row.nom || row.name || row.Name || '',
           price: row.Prix || row.prix || row.price || row.Price || '',
-          category: row.Categorie || row.categorie || row.category || row.Category || '',
-          description: row.Description || row.description || '',
-          image: row.Image || row.image || row.ImageURL || row.imageURL || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop',
-          stock: row.Stock || row.stock || 0
-        }));
+          category: row.Categorie || row.categorie || row.Category || row.category || '',
+          description: row.Description || row.description || row.Desc || row.desc || '',
+          image: row.Image || row.image || row.ImageURL || row.imageURL || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop'
+        })).filter(p => p.name && p.price);
 
-        setProducts([...products, ...importedProducts]);
-        alert(`✅ ${importedProducts.length} produits importés avec succès !`);
+        // Add products via API
+        addProductsViaAPI(importedProducts);
       } catch (error) {
         alert('❌ Erreur lors de l\'import du fichier Excel');
         console.error(error);
@@ -62,43 +61,103 @@ export default function AdminPanel({ products, setProducts }) {
     e.target.value = ''; // Reset input
   };
 
+  const addProductsViaAPI = async (productsToAdd) => {
+    setLoading(true);
+    try {
+      const promises = productsToAdd.map(product =>
+        fetch('http://localhost:4000/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(product)
+        })
+      );
+      await Promise.all(promises);
+      // Refetch products
+      const response = await fetch('http://localhost:4000/products');
+      const updatedProducts = await response.json();
+      setProducts(updatedProducts);
+      alert(`✅ ${productsToAdd.length} produits importés avec succès !`);
+    } catch (error) {
+      alert('❌ Erreur lors de l\'import');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Ajouter un produit manuellement
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
     if (!name || !price) {
       alert('⚠️ Veuillez remplir au moins le nom et le prix');
       return;
     }
 
     const newProduct = {
-      id: Date.now(),
       name,
       price,
-      category,
-      description,
-      image: image || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop',
-      stock
+      image: image || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop'
     };
 
-    setProducts([...products, newProduct]);
-    
-    // Reset le formulaire
-    setName('');
-    setPrice('');
-    setCategory('');
-    setDescription('');
-    setStock('');
-    setImage('');
-    setImageFile(null);
-    setShowAddForm(false);
-    
-    alert('✅ Produit ajouté avec succès !');
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:4000/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProduct)
+      });
+
+      if (response.ok) {
+        // Refetch products
+        const fetchResponse = await fetch('http://localhost:4000/products');
+        const updatedProducts = await fetchResponse.json();
+        setProducts(updatedProducts);
+
+        // Reset le formulaire
+        setName('');
+        setPrice('');
+        setCategory('');
+        setDescription('');
+        setStock('');
+        setImage('');
+        setImageFile(null);
+        setShowAddForm(false);
+        
+        alert('✅ Produit ajouté avec succès !');
+      } else {
+        alert('❌ Erreur lors de l\'ajout du produit');
+      }
+    } catch (error) {
+      alert('❌ Erreur réseau');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Supprimer un produit
-  const handleDeleteProduct = (id) => {
+  const handleDeleteProduct = async (id) => {
     if (window.confirm('⚠️ Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      setProducts(products.filter(p => p.id !== id));
-      alert('🗑️ Produit supprimé !');
+      setLoading(true);
+      try {
+        const response = await fetch(`http://localhost:4000/products/${id}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          // Refetch products
+          const fetchResponse = await fetch('http://localhost:4000/products');
+          const updatedProducts = await fetchResponse.json();
+          setProducts(updatedProducts);
+          alert('🗑️ Produit supprimé !');
+        } else {
+          alert('❌ Erreur lors de la suppression');
+        }
+      } catch (error) {
+        alert('❌ Erreur réseau');
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -271,10 +330,11 @@ export default function AdminPanel({ products, setProducts }) {
               {/* Bouton */}
               <button
                 onClick={handleAddProduct}
-                className="w-full py-5 bg-[#ebc280] text-black hover:bg-[#d4a860] transition-colors tracking-widest text-sm font-bold rounded-lg flex items-center justify-center gap-2"
+                disabled={loading}
+                className="w-full py-5 bg-[#ebc280] text-black hover:bg-[#d4a860] transition-colors tracking-widest text-sm font-bold rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <Plus size={20} />
-                AJOUTER LE PRODUIT
+                {loading ? 'AJOUT EN COURS...' : 'AJOUTER LE PRODUIT'}
               </button>
             </div>
           </div>
@@ -326,7 +386,8 @@ export default function AdminPanel({ products, setProducts }) {
                         </div>
                         <button
                           onClick={() => handleDeleteProduct(product.id)}
-                          className="p-3 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-all duration-300 group"
+                          disabled={loading}
+                          className="p-3 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-all duration-300 group disabled:opacity-50"
                           title="Supprimer ce produit"
                         >
                           <Trash2 size={22} className="group-hover:scale-110 transition-transform" />

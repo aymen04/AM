@@ -33,6 +33,13 @@ export default function CategoryCarousel3D() {
       image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&h=600&fit=crop',
       count: '15 créations',
       description: 'Lumière et raffinement'
+    },
+    {
+      id: 5,
+      name: 'Pendentifs',
+      image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=600&fit=crop',
+      count: '8 créations',
+      description: 'Grâce et spiritualité'
     }
   ];
 

@@ -8,11 +8,20 @@ export default function Boutique({ products }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
+  // Remove duplicate products by id
+  const uniqueProductsMap = new Map();
+  products.forEach(p => {
+    if (!uniqueProductsMap.has(p.id)) {
+      uniqueProductsMap.set(p.id, p);
+    }
+  });
+  const uniqueProducts = Array.from(uniqueProductsMap.values());
+
   // Extraire les catégories uniques
-  const categories = ['Tous', ...new Set(products.map(p => p.category).filter(Boolean))];
+  const categories = ['Tous', ...new Set(uniqueProducts.map(p => p.category).filter(Boolean))];
 
   // Filtrer les produits
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = uniqueProducts.filter(product => {
     const matchCategory = selectedCategory === 'Tous' || product.category === selectedCategory;
     const matchSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchCategory && matchSearch;
@@ -126,39 +135,28 @@ export default function Boutique({ products }) {
                       )}
 
                       {/* Badge stock faible */}
-                      {product.stock && parseInt(product.stock) < 5 && (
-                        <div className="absolute top-3 right-3 px-3 py-1 bg-red-500/90 backdrop-blur-sm text-white text-xs tracking-wider rounded-full">
-                          Stock limité
+                        {/* Bouton rapide au survol */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                          <button className="px-6 py-3 bg-[#ebc280] text-black hover:bg-[#d4a860] transition-colors rounded-lg flex items-center gap-2 text-sm font-medium tracking-wide">
+                            <ShoppingBag size={16} />
+                            Voir le produit
+                          </button>
                         </div>
-                      )}
+                      </div>
 
-                      {/* Bouton rapide au survol */}
-                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-                        <button className="px-6 py-3 bg-[#ebc280] text-black hover:bg-[#d4a860] transition-colors rounded-lg flex items-center gap-2 text-sm font-medium tracking-wide">
-                          <ShoppingBag size={16} />
-                          Voir le produit
-                        </button>
+                      {/* Infos */}
+                      <div className="p-5">
+                        <h3 className="text-lg font-light tracking-wide text-white mb-2 group-hover:text-[#ebc280] transition-colors line-clamp-2">
+                          {product.name}
+                        </h3>
+                        <div className="flex items-center justify-between">
+                          <p className="text-[#ebc280] text-xl font-medium">{product.price}</p>
+                        </div>
                       </div>
                     </div>
-
-                    {/* Infos */}
-                    <div className="p-5">
-                      <h3 className="text-lg font-light tracking-wide text-white mb-2 group-hover:text-[#ebc280] transition-colors line-clamp-2">
-                        {product.name}
-                      </h3>
-                      <div className="flex items-center justify-between">
-                        <p className="text-[#ebc280] text-xl font-medium">{product.price}</p>
-                        {product.stock && (
-                          <span className="text-xs text-gray-500">
-                            Stock: {product.stock}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                  </Link>
+                ))}
+              </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
@@ -198,9 +196,9 @@ export default function Boutique({ products }) {
                 </button>
               </div>
             )}
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
 }

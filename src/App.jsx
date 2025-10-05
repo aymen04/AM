@@ -21,11 +21,8 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [products, setProducts] = useState([
-    { id: 1, name: 'Collier Améthyste', price: '289€', image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=400&fit=crop' },
-    { id: 2, name: 'Bracelet Quartz Rose', price: '179€', image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&h=400&fit=crop' },
-    { id: 3, name: 'Bague Lapis Lazuli', price: '229€', image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&h=400&fit=crop' }
-  ]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,6 +31,22 @@ export default function App() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:4000/products');
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Router>
@@ -73,22 +86,26 @@ export default function App() {
                   <h2 className="text-4xl font-light tracking-widest text-center text-[#ebc280] mb-16">
                     SÉLECTION EXCLUSIVE
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {products.slice(0, 6).map(product => (
-                      <div key={product.id} className="group cursor-pointer">
-                        <div className="relative overflow-hidden mb-4 aspect-square">
-                          <img 
-                            src={product.image} 
-                            alt={product.name}
-                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
-                          />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  {loading ? (
+                    <div className="text-center text-[#ebc280]">Chargement...</div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      {products.slice(0, 6).map(product => (
+                        <div key={product.id} className="group cursor-pointer">
+                          <div className="relative overflow-hidden mb-4 aspect-square">
+                            <img 
+                              src={product.image} 
+                              alt={product.name}
+                              className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          </div>
+                          <h3 className="text-xl font-light tracking-wide text-white mb-2">{product.name}</h3>
+                          <p className="text-[#ebc280] text-lg">{product.price}</p>
                         </div>
-                        <h3 className="text-xl font-light tracking-wide text-white mb-2">{product.name}</h3>
-                        <p className="text-[#ebc280] text-lg">{product.price}</p>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                   <div className="text-center mt-12">
                     <Link to="/boutique" className="px-10 py-3 border border-[#ebc280] text-[#ebc280] hover:bg-[#ebc280] hover:text-black transition-all duration-300 tracking-widest text-sm">
                       VOIR TOUTE LA BOUTIQUE
