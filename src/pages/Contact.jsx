@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import video from '../assets/formanimation.mp4';
+import Ring3D from '../components/Ring3D';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -9,6 +9,7 @@ export default function Contact() {
     description: '',
     image: null
   });
+  const [submitStatus, setSubmitStatus] = useState('');
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -19,11 +20,45 @@ export default function Contact() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log(formData);
-    alert('Formulaire soumis !');
+    setSubmitStatus('loading');
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('prenom', formData.prenom);
+      formDataToSend.append('nom', formData.nom);
+      formDataToSend.append('telephone', formData.telephone);
+      formDataToSend.append('description', formData.description);
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
+
+      const response = await fetch('https://localhost:4000/backend/contact', {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setFormData({
+          prenom: '',
+          nom: '',
+          telephone: '',
+          description: '',
+          image: null
+        });
+        setTimeout(() => setSubmitStatus(''), 3000);
+      } else {
+        throw new Error(result.error || 'Erreur lors de l\'envoi');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      setSubmitStatus('error');
+      setTimeout(() => setSubmitStatus(''), 3000);
+    }
   };
 
   return (
@@ -32,18 +67,9 @@ export default function Contact() {
         CONTACT
       </h2>
       <div className="flex flex-col lg:flex-row gap-12 items-center">
-        {/* Video Animation on the Left */}
+        {/* 3D Ring Animation on the Left */}
         <div className="lg:w-1/2">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-auto rounded-lg shadow-lg"
-          >
-            <source src={video} type="video/mp4" />
-            Votre navigateur ne supporte pas la vidéo.
-          </video>
+          <Ring3D />
         </div>
         {/* Contact Form on the Right */}
         <div className="lg:w-1/2">
@@ -119,10 +145,42 @@ export default function Contact() {
             </div>
             <button
               type="submit"
-              className="w-full px-6 py-3 bg-[#ebc280] text-black font-semibold rounded-lg hover:bg-yellow-400 transition"
+              disabled={submitStatus === 'loading'}
+              className="w-full px-6 py-3 bg-[#ebc280] text-black font-semibold rounded-lg hover:bg-yellow-400 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Envoyer
+              {submitStatus === 'loading' ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                  Envoi en cours...
+                </>
+              ) : submitStatus === 'success' ? (
+                <>
+                  ✓ Envoyé !
+                </>
+              ) : submitStatus === 'error' ? (
+                <>
+                  ✗ Erreur
+                </>
+              ) : (
+                'Envoyer'
+              )}
             </button>
+
+            {submitStatus === 'success' && (
+              <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 text-center">
+                <p className="text-green-400">
+                  ✨ Merci ! Nous reviendrons vers vous sous 24h.
+                </p>
+              </div>
+            )}
+
+            {submitStatus === 'error' && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-center">
+                <p className="text-red-400">
+                  Erreur lors de l'envoi. Veuillez réessayer.
+                </p>
+              </div>
+            )}
           </form>
         </div>
       </div>

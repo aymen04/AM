@@ -1,37 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import bracelet from '../assets/bracelet.jpeg';
+import ring from '../assets/ring.jpeg';
+import earing from '../assets/earring.jpeg';
+import necklace from '../assets/necklace.jpeg';
+import pendant from '../assets/pendant.jpeg';
 
 export default function CategoryCarousel3D() {
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
 
   const categories = [
     {
       id: 1,
-      name: 'collier',
-      image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&h=600&fit=crop',
-      count: '12 créations',
+      name: 'Colliers',
+      slug: 'Collier',
+      image: necklace,
       description: 'Élégance autour du cou'
     },
     {
       id: 2,
-      name: 'bracelet',
-      image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&h=600&fit=crop',
-      count: '18 créations',
+      name: 'Bracelets',
+      slug: 'Bracelet',
+      image: bracelet,
       description: 'Sublimez vos poignets'
     },
     {
       id: 3,
-      name: 'boucle d\'oreille',
-      image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&h=600&fit=crop',
-      count: '15 créations',
-      description: 'Lumière et raffinement'
+      name: 'Bagues',
+      slug: 'Bague',
+      image: ring,
+      description: 'Bijoux de caractère'
     },
     {
       id: 4,
-      name: 'pendentif',
-      image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=600&fit=crop',
-      count: '8 créations',
+      name: 'Boucles d\'oreilles',
+      slug: 'Boucles d\'oreilles',
+      image: earing,
+      description: 'Lumière et raffinement'
+    },
+    {
+      id: 5,
+      name: 'Pendentifs',
+      slug: 'Pendentif',
+      image: pendant,
       description: 'Grâce et spiritualité'
     }
   ];
@@ -50,14 +64,12 @@ export default function CategoryCarousel3D() {
     const position = (index - currentIndex + categories.length) % categories.length;
     const totalCards = categories.length;
     
-    // Calcul de la position sur le cercle
     const angle = (position / totalCards) * Math.PI * 2;
     const radius = 280;
     const x = Math.sin(angle) * radius;
     const z = Math.cos(angle) * radius;
     const rotateY = (angle * 180) / Math.PI;
     
-    // Opacité et échelle basées sur la position
     const isCurrent = position === 0;
     const opacity = isCurrent ? 1 : position === 1 || position === totalCards - 1 ? 0.5 : 0.2;
     const scale = isCurrent ? 1.2 : position === 1 || position === totalCards - 1 ? 0.85 : 0.6;
@@ -79,9 +91,14 @@ export default function CategoryCarousel3D() {
     setIsAutoRotating(false);
   };
 
+  const handleCardClick = (category, isCurrent) => {
+    if (isCurrent) {
+      navigate(`/boutique?category=${category.slug}`);
+    }
+  };
+
   return (
     <section className="py-32 bg-black relative overflow-hidden">
-      {/* Effet de lumière d'ambiance */}
       <div className="absolute inset-0 bg-gradient-radial from-[#ebc280]/10 via-transparent to-transparent opacity-30"></div>
       
       <div className="container mx-auto px-6">
@@ -94,7 +111,6 @@ export default function CategoryCarousel3D() {
           </p>
         </div>
 
-        {/* Container 3D */}
         <div className="relative h-[600px] flex items-center justify-center">
           <div 
             className="relative w-full h-full"
@@ -102,7 +118,6 @@ export default function CategoryCarousel3D() {
             onMouseEnter={() => setIsAutoRotating(false)}
             onMouseLeave={() => setIsAutoRotating(true)}
           >
-            {/* Carrousel 3D */}
             <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d' }}>
               {categories.map((category, index) => {
                 const position = (index - currentIndex + categories.length) % categories.length;
@@ -117,12 +132,10 @@ export default function CategoryCarousel3D() {
                       transformStyle: 'preserve-3d',
                       pointerEvents: isCurrent ? 'auto' : 'none'
                     }}
-                    onClick={() => isCurrent && alert(`Naviguer vers ${category.name}`)}
+                    onClick={() => handleCardClick(category, isCurrent)}
                   >
                     <div className="relative w-[380px] h-[480px] group">
-                      {/* Carte principale */}
                       <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-[#ebc280]/20 bg-zinc-900">
-                        {/* Image de fond */}
                         <div className="absolute inset-0">
                           <img 
                             src={category.image} 
@@ -132,7 +145,6 @@ export default function CategoryCarousel3D() {
                           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
                         </div>
 
-                        {/* Contenu */}
                         <div className="absolute inset-0 flex flex-col justify-end p-8">
                           <div className="transform transition-transform duration-300 group-hover:translate-y-[-10px]">
                             <p className="text-[#ebc280] text-sm tracking-widest mb-2 uppercase">
@@ -146,20 +158,18 @@ export default function CategoryCarousel3D() {
                             </p>
                             
                             {isCurrent && (
-                              <button className="px-8 py-3 border-2 border-[#ebc280] text-[#ebc280] hover:bg-[#ebc280] hover:text-black transition-all duration-300 tracking-widest text-xs opacity-0 group-hover:opacity-100">
+                              <button className="inline-block px-8 py-3 border-2 border-[#ebc280] text-[#ebc280] hover:bg-[#ebc280] hover:text-black transition-all duration-300 tracking-widest text-xs opacity-0 group-hover:opacity-100">
                                 DÉCOUVRIR
                               </button>
                             )}
                           </div>
                         </div>
 
-                        {/* Effet de brillance au survol */}
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ebc280]/10 to-transparent transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
                         </div>
                       </div>
 
-                      {/* Ombre portée dynamique */}
                       {isCurrent && (
                         <div className="absolute bottom-[-40px] left-1/2 transform -translate-x-1/2 w-[90%] h-8 bg-[#ebc280]/20 blur-2xl rounded-full"></div>
                       )}
@@ -170,7 +180,6 @@ export default function CategoryCarousel3D() {
             </div>
           </div>
 
-          {/* Boutons de navigation */}
           <button
             onClick={prev}
             className="absolute left-4 md:left-12 top-1/2 transform -translate-y-1/2 z-20 w-14 h-14 rounded-full border-2 border-[#ebc280] text-[#ebc280] hover:bg-[#ebc280] hover:text-black transition-all duration-300 flex items-center justify-center backdrop-blur-sm bg-black/30"
@@ -186,7 +195,6 @@ export default function CategoryCarousel3D() {
           </button>
         </div>
 
-        {/* Indicateurs de position */}
         <div className="flex justify-center gap-3 mt-12">
           {categories.map((_, index) => (
             <button
@@ -204,7 +212,6 @@ export default function CategoryCarousel3D() {
           ))}
         </div>
 
-        {/* Info rotation auto */}
         <div className="text-center mt-8">
           <p className="text-gray-500 text-sm tracking-wide">
             {isAutoRotating ? '⟳ Rotation automatique' : 'Pause - Survolez pour explorer'}

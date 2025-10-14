@@ -27,12 +27,8 @@ export default function ProductDetail({ products }) {
     );
   }
 
-  // Images (utiliser l'image principale + quelques variations pour la démo)
-  const images = [
-    product.image,
-    product.image, // À remplacer par d'autres angles
-    product.image
-  ];
+  // Images (utiliser les images du produit ou l'image principale)
+  const images = product.images && product.images.length > 0 ? product.images : [product.image];
 
   return (
     <div className="min-h-screen pt-32 pb-24 bg-black">
@@ -151,11 +147,11 @@ export default function ProductDetail({ products }) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-2 text-gray-300">
                   <Check size={18} className="text-[#ebc280]" />
-                  <span>Pierre naturelle</span>
+                  <span>Pierre VVS1</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-300">
                   <Check size={18} className="text-[#ebc280]" />
-                  <span>Fait main</span>
+                  <span>Métaux précieux</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-300">
                   <Check size={18} className="text-[#ebc280]" />
