@@ -1,8 +1,7 @@
 console.log('PORT:', process.env.PORT);
 console.log('MYSQL_URL:', process.env.MYSQL_URL);
 
-import dotenv from 'dotenv';
-dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import mysql from 'mysql2/promise';
