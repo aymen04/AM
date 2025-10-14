@@ -1,12 +1,7 @@
-# TODO: Add 3D Diamond Animation to CustomOrders Page
+# Update Fetch URLs to New Link
 
 ## Tasks
-- [x] Add 3D diamond HTML structure with multiple facets
-- [x] Implement CSS 3D transforms and animations for diamond rotation
-- [x] Add scroll-triggered highlighting for process steps
-- [x] Integrate diamond animation with existing process steps layout
-- [x] Install Three.js and React Three Fiber for real 3D model
-- [x] Create Diamond3D component with placeholder octahedron
-- [x] Replace placeholder with actual GLTF model from Sketchfab
-- [x] Test animation performance and responsiveness
-- [x] Finalize styling and effects for stunning visual impact
+- [x] Update fetch URL in src/pages/Contact.jsx: 'https://localhost:4000/backend/contact' -> 'https://am-wniz.onrender.com/backend/contact'
+- [x] Update fetch URL in src/App.jsx: 'http://localhost:4000/products' -> 'https://am-wniz.onrender.com/products'
+- [x] Update multiple fetch URLs in src/pages/AdminPanel.jsx: 'http://localhost:4000/backend/products' -> 'https://am-wniz.onrender.com/backend/products'
+- [x] Verify all changes are correct and no localhost URLs remain

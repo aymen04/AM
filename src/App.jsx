@@ -43,7 +43,7 @@ export default function App() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:4000/products');
+      const response = await fetch('https://am-wniz.onrender.com/products');
       if (response.ok) {
         const data = await response.json();
         setProducts(data);

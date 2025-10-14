@@ -94,7 +94,7 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
     setLoading(true);
     try {
       const promises = productsToAdd.map(product =>
-        fetch('http://localhost:4000/backend/products', {
+        fetch('https://am-wniz.onrender.com/backend/products', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(product)
@@ -102,7 +102,7 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
       );
       await Promise.all(promises);
       // Refetch products
-      const response = await fetch('http://localhost:4000/backend/products');
+      const response = await fetch('https://am-wniz.onrender.com/backend/products');
       const updatedProducts = await response.json();
       setProducts(updatedProducts);
       alert(`✅ ${productsToAdd.length} produits importés avec succès !`);
@@ -143,7 +143,7 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:4000/backend/products', {
+      const response = await fetch('https://am-wniz.onrender.com/backend/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newProduct)
@@ -151,7 +151,7 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
 
       if (response.ok) {
         // Refetch products
-        const fetchResponse = await fetch('http://localhost:4000/backend/products');
+        const fetchResponse = await fetch('https://am-wniz.onrender.com/backend/products');
         const updatedProducts = await fetchResponse.json();
         setProducts(updatedProducts);
 
@@ -181,15 +181,15 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
     console.log('handleDeleteProduct called with id:', id);
     setLoading(true);
     try {
-      console.log('Sending DELETE request to:', `http://localhost:4000/backend/products/${id}`);
-      const response = await fetch(`http://localhost:4000/backend/products/${id}`, {
+      console.log('Sending DELETE request to:', `https://am-wniz.onrender.com/backend/products/${id}`);
+      const response = await fetch(`https://am-wniz.onrender.com/backend/products/${id}`, {
         method: 'DELETE'
       });
       console.log('DELETE response status:', response.status);
 
       if (response.ok) {
         // Refetch products
-        const fetchResponse = await fetch('http://localhost:4000/backend/products');
+        const fetchResponse = await fetch('https://am-wniz.onrender.com/backend/products');
         const updatedProducts = await fetchResponse.json();
         setProducts(updatedProducts);
         alert('🗑️ Produit supprimé !');

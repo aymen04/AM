@@ -34,7 +34,7 @@ export default function Contact() {
         formDataToSend.append('image', formData.image);
       }
 
-      const response = await fetch('https://localhost:4000/backend/contact', {
+      const response = await fetch('https://am-wniz.onrender.com/backend/contact', {
         method: 'POST',
         body: formDataToSend,
       });
