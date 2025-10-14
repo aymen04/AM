@@ -21,7 +21,7 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
 
   const fetchCustomOrders = async () => {
     try {
-      const response = await fetch('http://localhost:4000/custom-orders');
+      const response = await fetch('https://am-wniz.onrender.com/custom-orders');
       const data = await response.json();
       setCustomOrders(data);
     } catch (error) {
@@ -222,7 +222,7 @@ const confirmDelete = async () => {
   try {
     console.log('🚀 Envoi DELETE vers:', `http://localhost:4000/custom-orders/${id}`);
 
-    const response = await fetch(`http://localhost:4000/custom-orders/${id}`, {
+    const response = await fetch(`https://am-wniz.onrender.com/custom-orders/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
