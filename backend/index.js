@@ -298,6 +298,9 @@ app.delete('/custom-orders/:id', async (req, res) => {
   }
 });
 
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

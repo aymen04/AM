@@ -577,7 +577,7 @@ const confirmDelete = async () => {
                             if (images && images.length > 0) {
                               return (
                                 <img
-                                  src={`http://localhost:4000/backend/uploads/${images[0]}`}
+                                  src={`https://am-wniz.onrender.com/uploads/${images[0]}`}
                                   alt="Inspiration"
                                   className="w-full h-full object-cover"
                                 />
