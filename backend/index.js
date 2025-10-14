@@ -23,8 +23,13 @@ const bot = new TelegramBot(botToken, { polling: false });
 const app = express();
 const port = process.env.PORT || 4000;
 
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.use(cors({
+  origin: [
+    'https://am-beryl.vercel.app',
+    'http://localhost:5173' // pour dev local
+  ],
+  methods: ['GET','POST','DELETE','PUT']
+}));
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({

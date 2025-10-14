@@ -58,7 +58,7 @@ export default function CustomOrders() {
         formDataToSend.append('images', img.file);
       });
 
-      const response = await fetch('http://localhost:4000/custom-orders', {
+      const response = await fetch('https://am-wniz.onrender.com/custom-orders', {
         method: 'POST',
         body: formDataToSend,
       });
