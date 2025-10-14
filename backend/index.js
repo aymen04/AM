@@ -73,32 +73,35 @@ const pool = mysql.createPool({
 // Get all products
 app.get('/products', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT id, name, price, category, images, description, stock, created_at FROM products');
+    const [rows] = await pool.query(
+      'SELECT id, name, price, category, images, description, stock, created_at FROM products'
+    );
 
     rows.forEach(row => {
-      // Assure que images est toujours un tableau
-      if (row.images) {
+      if (typeof row.images === 'string') {
+        let imagesArray = [];
+
         try {
-          if (typeof row.images === 'string') {
-            row.images = JSON.parse(row.images);
-          }
-          if (!Array.isArray(row.images)) {
-            row.images = [row.images];
-          }
-        } catch {
-          row.images = [];
+          imagesArray = JSON.parse(row.images);
+        } catch (err) {
+          // si ce n'est pas du JSON, on considère qu'il s'agit d'une seule image
+          imagesArray = [row.images];
         }
-      } else {
-        row.images = [];
+
+        // Convertir chaque nom de fichier en URL complète
+        row.images = imagesArray.map(fileName => 
+          `https://am-wniz.onrender.com/uploads/${path.basename(fileName)}`
+        );
       }
     });
 
     res.json(rows);
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error('Erreur récupération produits :', error);
     res.status(500).json({ error: 'Database error' });
   }
 });
+
 
 app.post('/products', async (req, res) => {
   const { name, price, images, category, description, stock } = req.body;
