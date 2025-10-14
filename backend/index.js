@@ -74,19 +74,28 @@ const pool = mysql.createPool({
 app.get('/products', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT id, name, price, category, images, description, stock, created_at FROM products');
+
     rows.forEach(row => {
-      if (typeof row.images === 'string') {
-        if (row.images.startsWith('[')) {
-          row.images = JSON.parse(row.images);
-        } else {
-          // Old format: single image URL
-          row.images = [row.images];
+      // Assure que images est toujours un tableau
+      if (row.images) {
+        try {
+          if (typeof row.images === 'string') {
+            row.images = JSON.parse(row.images);
+          }
+          if (!Array.isArray(row.images)) {
+            row.images = [row.images];
+          }
+        } catch {
+          row.images = [];
         }
+      } else {
+        row.images = [];
       }
     });
+
     res.json(rows);
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching products:', error);
     res.status(500).json({ error: 'Database error' });
   }
 });
