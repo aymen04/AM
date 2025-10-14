@@ -23,13 +23,16 @@ const bot = new TelegramBot(botToken, { polling: false });
 const app = express();
 const port = process.env.PORT || 4000;
 
-app.use(cors({
-  origin: [
-    'https://am-beryl.vercel.app',
-    'http://localhost:5173' // pour dev local
-  ],
-  methods: ['GET','POST','DELETE','PUT']
-}));
+app.use(
+  cors({
+    origin: [
+      'https://am-beryl.vercel.app', // ton front déployé sur Vercel
+      'http://localhost:5173',       // utile pour le dev local
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  })
+);
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
