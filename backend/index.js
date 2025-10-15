@@ -227,17 +227,23 @@ app.delete('/custom-orders/:id', async (req, res) => {
 });
 
 // -------------------- SERVE REACT BUILD --------------------
-app.use(express.static(path.join(__dirname, '..', 'dist')));
+// Chemin vers ton build React
+const reactBuildPath = path.join(__dirname, '../dist');
+app.use(express.static(reactBuildPath));
 
-app.get('*', (req, res) => {
-  // Skip API routes
-  if (req.path.startsWith('/products') ||
-      req.path.startsWith('/custom-orders') ||
-      req.path.startsWith('/contact') ||
-      req.path.startsWith('/uploads')) {
+// Toutes les autres routes non API -> React
+app.get('/*', (req, res) => {
+  // Ignorer les routes API et uploads
+  if (
+    req.path.startsWith('/products') ||
+    req.path.startsWith('/custom-orders') ||
+    req.path.startsWith('/contact') ||
+    req.path.startsWith('/uploads')
+  ) {
     return res.status(404).json({ error: 'API route not found' });
   }
-  res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
+
+  res.sendFile(path.join(reactBuildPath, 'index.html'));
 });
 
 // -------------------- START SERVER --------------------
