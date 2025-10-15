@@ -28,7 +28,7 @@ export default function ProductDetail({ products }) {
   }
 
   // Images (utiliser les images du produit ou l'image principale)
-  const images = product.images && product.images.length > 0 ? product.images : [product.image];
+  const images = product.images && product.images.length > 0 ? product.images : ['/src/assets/logo.jpeg'];
 
   return (
     <div className="min-h-screen pt-32 pb-24 bg-black">

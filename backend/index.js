@@ -87,9 +87,12 @@ app.get('/products', async (req, res) => {
           imagesArray = [row.images];
         }
 
-        row.images = imagesArray.map(base64String => {
-          if (base64String.startsWith('data:image')) return base64String;
-          return `data:image/jpeg;base64,${base64String}`;
+        // Convertir les chemins d'images en URLs complètes
+        row.images = imagesArray.map(img => {
+          if (img.startsWith('data:image')) return img;
+          if (img.startsWith('http')) return img;
+          // Pour les images uploadées, construire l'URL complète
+          return `https://am-wniz.onrender.com/uploads/${img}`;
         });
       }
     });
@@ -100,6 +103,7 @@ app.get('/products', async (req, res) => {
     res.status(500).json({ error: 'Database error' });
   }
 });
+
 
 
 // Create product

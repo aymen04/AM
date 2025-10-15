@@ -42,20 +42,32 @@ export default function CustomOrders() {
     e.preventDefault();
     setSubmitStatus('loading');
 
-    // Simulate API call delay
-    setTimeout(() => {
-      console.log('Custom order submitted:', { formData, images });
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('phone', formData.phone);
+      formDataToSend.append('projectType', formData.projectType);
+      formDataToSend.append('budget', formData.budget);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('inspiration', formData.inspiration);
+      formDataToSend.append('deadline', formData.deadline);
 
-      // Store in localStorage for demo purposes
-      const existingOrders = JSON.parse(localStorage.getItem('customOrders') || '[]');
-      const newOrder = {
-        id: Date.now(),
-        ...formData,
-        images: images.map(img => img.name),
-        created_at: new Date().toISOString()
-      };
-      existingOrders.push(newOrder);
-      localStorage.setItem('customOrders', JSON.stringify(existingOrders));
+      images.forEach((img, index) => {
+        formDataToSend.append('images', img.file);
+      });
+
+      const response = await fetch('https://am-wniz.onrender.com/custom-orders', {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit custom order');
+      }
+
+      const result = await response.json();
+      console.log('Custom order submitted:', result);
 
       setSubmitStatus('success');
       // Reset form
@@ -71,7 +83,11 @@ export default function CustomOrders() {
       });
       setImages([]);
       setTimeout(() => setSubmitStatus(''), 3000);
-    }, 1000);
+    } catch (error) {
+      console.error('Error submitting custom order:', error);
+      setSubmitStatus('error');
+      setTimeout(() => setSubmitStatus(''), 3000);
+    }
   };
 
   useEffect(() => {

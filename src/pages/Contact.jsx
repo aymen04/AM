@@ -24,9 +24,28 @@ export default function Contact() {
     e.preventDefault();
     setSubmitStatus('loading');
 
-    // Simulate API call delay
-    setTimeout(() => {
-      console.log('Contact form submitted:', formData);
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('prenom', formData.prenom);
+      formDataToSend.append('nom', formData.nom);
+      formDataToSend.append('telephone', formData.telephone);
+      formDataToSend.append('description', formData.description);
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
+
+      const response = await fetch('https://am-wniz.onrender.com/contact', {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit contact form');
+      }
+
+      const result = await response.json();
+      console.log('Contact form submitted:', result);
+
       setSubmitStatus('success');
       setFormData({
         prenom: '',
@@ -36,7 +55,11 @@ export default function Contact() {
         image: null
       });
       setTimeout(() => setSubmitStatus(''), 3000);
-    }, 1000);
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      setSubmitStatus('error');
+      setTimeout(() => setSubmitStatus(''), 3000);
+    }
   };
 
   return (

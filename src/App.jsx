@@ -23,66 +23,31 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "Collier Améthyste",
-      price: "289€",
-      category: "collier",
-      description: "Magnifique collier en améthyste naturelle, monté sur argent 925. Pierre de 8mm, chaîne ajustable.",
-      images: ["https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop"],
-      stock: 5
-    },
-    {
-      id: 2,
-      name: "Bracelet Lapis Lazuli",
-      price: "199€",
-      category: "bracelet",
-      description: "Bracelet en lapis lazuli véritable avec fermoir en argent. Pierres de 6mm parfaitement calibrées.",
-      images: ["https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&h=400&fit=crop"],
-      stock: 8
-    },
-    {
-      id: 3,
-      name: "Bague Citrine",
-      price: "349€",
-      category: "bague",
-      description: "Bague solitaire en citrine jaune dorée, monture en or 18k. Pierre centrale de 10mm.",
-      images: ["https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&h=400&fit=crop"],
-      stock: 3
-    },
-    {
-      id: 4,
-      name: "Boucles d'Oreilles Quartz Rose",
-      price: "159€",
-      category: "boucle d'oreille",
-      description: "Paires de boucles en quartz rose poli, montées sur argent avec crochets hypoallergéniques.",
-      images: ["https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&h=400&fit=crop"],
-      stock: 12
-    },
-    {
-      id: 5,
-      name: "Pendentif Œil de Tigre",
-      price: "129€",
-      category: "pendentif",
-      description: "Pendentif en œil de tigre naturel, suspendu à une chaîne en argent 925 de 45cm.",
-      images: ["https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&h=400&fit=crop"],
-      stock: 7
-    },
-    {
-      id: 6,
-      name: "Collier Labradorite",
-      price: "399€",
-      category: "collier",
-      description: "Collier en labradorite iridescente, pierres facettées montées sur argent. Longueur 42cm.",
-      images: ["https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop"],
-      stock: 2
-    }
-  ]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('https://am-wniz.onrender.com/products');
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -137,7 +102,7 @@ export default function App() {
                         <div key={product.id} className="group cursor-pointer">
                           <div className="relative overflow-hidden mb-4 aspect-square">
                             <img
-                              src={product.images && product.images.length > 0 ? product.images[0] : product.image}
+                              src={product.images && product.images.length > 0 ? product.images[0] : '/src/assets/logo.jpeg'}
                               alt={product.name}
                               className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                             />

@@ -135,7 +135,7 @@ export default function Boutique({ products }) {
                   <div className="bg-zinc-900 overflow-hidden rounded-lg hover:shadow-2xl hover:shadow-[#ebc280]/10 transition-all duration-300 border border-zinc-800 hover:border-[#ebc280]/40">
                     <div className="relative aspect-square overflow-hidden bg-zinc-800">
                       <img
-                        src={product.images && product.images.length > 0 ? product.images[0] : product.image}
+                        src={product.images && product.images.length > 0 ? product.images[0] : '/src/assets/logo.jpeg'}
                         alt={product.name}
                         className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                       />

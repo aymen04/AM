@@ -19,9 +19,20 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
     loadCustomOrders();
   }, []);
 
-  const loadCustomOrders = () => {
-    const storedOrders = JSON.parse(localStorage.getItem('customOrders') || '[]');
-    setCustomOrders(storedOrders);
+  const loadCustomOrders = async () => {
+    try {
+      const response = await fetch('https://am-wniz.onrender.com/custom-orders');
+      if (!response.ok) {
+        throw new Error('Failed to fetch custom orders');
+      }
+      const data = await response.json();
+      setCustomOrders(data);
+    } catch (error) {
+      console.error('Error fetching custom orders:', error);
+      // Fallback to localStorage if API fails
+      const storedOrders = JSON.parse(localStorage.getItem('customOrders') || '[]');
+      setCustomOrders(storedOrders);
+    }
   };
 
 
@@ -123,7 +134,6 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
     }
 
     const newProduct = {
-      id: Date.now(),
       name,
       price,
       category: normalizeCategory(category),
@@ -134,8 +144,23 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
 
     setLoading(true);
     try {
+      const response = await fetch('https://am-wniz.onrender.com/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newProduct),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add product');
+      }
+
+      const result = await response.json();
+      console.log('Product added:', result);
+
       // Add to local state
-      setProducts(prev => [...prev, newProduct]);
+      setProducts(prev => [...prev, { ...newProduct, id: result.id }]);
 
       // Reset le formulaire
       setName('');
@@ -160,6 +185,14 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
     console.log('handleDeleteProduct called with id:', id);
     setLoading(true);
     try {
+      const response = await fetch(`https://am-wniz.onrender.com/products/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete product');
+      }
+
       // Remove from local state
       setProducts(prev => prev.filter(product => product.id !== id));
       alert('🗑️ Produit supprimé !');
@@ -179,27 +212,33 @@ const handleDeleteCustomOrder = async (id) => {
   setDeleteConfirmId(id); // Ouvre la modal custom
 };
 
-const confirmDelete = async () => {
-  const id = deleteConfirmId;
-  setDeleteConfirmId(null); // Ferme la modal
+  const confirmDelete = async () => {
+    const id = deleteConfirmId;
+    setDeleteConfirmId(null); // Ferme la modal
 
-  console.log('✅ Confirmation reçue, début de la suppression...');
-  setLoading(true);
+    console.log('✅ Confirmation reçue, début de la suppression...');
+    setLoading(true);
 
-  try {
-    // Remove from local state and localStorage
-    setCustomOrders(prev => prev.filter(order => order.id !== id));
-    const updatedOrders = JSON.parse(localStorage.getItem('customOrders') || '[]').filter(order => order.id !== id);
-    localStorage.setItem('customOrders', JSON.stringify(updatedOrders));
-    alert('🗑️ Commande supprimée !');
-  } catch (error) {
-    console.error('❌ Erreur lors de la suppression');
-    alert('❌ Erreur lors de la suppression');
-  } finally {
-    setLoading(false);
-    console.log('🏁 Fin du processus de suppression');
-  }
-};
+    try {
+      const response = await fetch(`https://am-wniz.onrender.com/custom-orders/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete custom order');
+      }
+
+      // Remove from local state
+      setCustomOrders(prev => prev.filter(order => order.id !== id));
+      alert('🗑️ Commande supprimée !');
+    } catch (error) {
+      console.error('❌ Erreur lors de la suppression');
+      alert('❌ Erreur lors de la suppression');
+    } finally {
+      setLoading(false);
+      console.log('🏁 Fin du processus de suppression');
+    }
+  };
   return (
     <div className="min-h-screen pt-32 pb-24 bg-black">
       <div className="container mx-auto px-6">
