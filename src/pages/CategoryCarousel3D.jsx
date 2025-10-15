@@ -11,6 +11,7 @@ export default function CategoryCarousel3D() {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
 
   const categories = [
     {
@@ -52,7 +53,7 @@ export default function CategoryCarousel3D() {
 
   useEffect(() => {
     if (!isAutoRotating) return;
-    
+
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % categories.length);
     }, 4000);
@@ -60,20 +61,31 @@ export default function CategoryCarousel3D() {
     return () => clearInterval(interval);
   }, [isAutoRotating, categories.length]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const getCardStyle = (index) => {
     const position = (index - currentIndex + categories.length) % categories.length;
     const totalCards = categories.length;
-    
+
+    // Responsive radius
+    const radius = windowWidth < 768 ? 180 : windowWidth < 1024 ? 240 : 280;
+
     const angle = (position / totalCards) * Math.PI * 2;
-    const radius = 280;
     const x = Math.sin(angle) * radius;
     const z = Math.cos(angle) * radius;
     const rotateY = (angle * 180) / Math.PI;
-    
+
     const isCurrent = position === 0;
     const opacity = isCurrent ? 1 : position === 1 || position === totalCards - 1 ? 0.5 : 0.2;
     const scale = isCurrent ? 1.2 : position === 1 || position === totalCards - 1 ? 0.85 : 0.6;
-    
+
     return {
       transform: `translateX(${x}px) translateZ(${z}px) rotateY(${rotateY}deg) scale(${scale})`,
       opacity: opacity,
@@ -111,7 +123,11 @@ export default function CategoryCarousel3D() {
           </p>
         </div>
 
-        <div className="relative h-[600px] flex items-center justify-center">
+        <div className={`relative flex items-center justify-center ${
+          windowWidth < 768 ? 'h-[400px]' :
+          windowWidth < 1024 ? 'h-[500px]' :
+          'h-[600px]'
+        }`}>
           <div 
             className="relative w-full h-full"
             style={{ perspective: '1200px' }}
@@ -134,7 +150,11 @@ export default function CategoryCarousel3D() {
                     }}
                     onClick={() => handleCardClick(category, isCurrent)}
                   >
-                    <div className="relative w-[380px] h-[480px] group">
+                    <div className={`relative group ${
+                      windowWidth < 768 ? 'w-[280px] h-[360px]' :
+                      windowWidth < 1024 ? 'w-[320px] h-[400px]' :
+                      'w-[380px] h-[480px]'
+                    }`}>
                       <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-[#ebc280]/20 bg-zinc-900">
                         <div className="absolute inset-0">
                           <img 
@@ -145,20 +165,30 @@ export default function CategoryCarousel3D() {
                           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
                         </div>
 
-                        <div className="absolute inset-0 flex flex-col justify-end p-8">
+                        <div className={`absolute inset-0 flex flex-col justify-end ${
+                          windowWidth < 768 ? 'p-4' : 'p-8'
+                        }`}>
                           <div className="transform transition-transform duration-300 group-hover:translate-y-[-10px]">
                             <p className="text-[#ebc280] text-sm tracking-widest mb-2 uppercase">
                               {category.count}
                             </p>
-                            <h3 className="text-4xl font-light tracking-wide text-white mb-3">
+                            <h3 className={`font-light tracking-wide text-white mb-3 ${
+                              windowWidth < 768 ? 'text-2xl' :
+                              windowWidth < 1024 ? 'text-3xl' :
+                              'text-4xl'
+                            }`}>
                               {category.name}
                             </h3>
-                            <p className="text-gray-300 text-sm mb-6 tracking-wide">
+                            <p className={`text-gray-300 mb-6 tracking-wide ${
+                              windowWidth < 768 ? 'text-xs' : 'text-sm'
+                            }`}>
                               {category.description}
                             </p>
-                            
+
                             {isCurrent && (
-                              <button className="inline-block px-8 py-3 border-2 border-[#ebc280] text-[#ebc280] hover:bg-[#ebc280] hover:text-black transition-all duration-300 tracking-widest text-xs opacity-0 group-hover:opacity-100">
+                              <button className={`inline-block border-2 border-[#ebc280] text-[#ebc280] hover:bg-[#ebc280] hover:text-black transition-all duration-300 tracking-widest opacity-0 group-hover:opacity-100 ${
+                                windowWidth < 768 ? 'px-4 py-2 text-xs' : 'px-8 py-3 text-xs'
+                              }`}>
                                 DÉCOUVRIR
                               </button>
                             )}
@@ -182,16 +212,20 @@ export default function CategoryCarousel3D() {
 
           <button
             onClick={prev}
-            className="absolute left-4 md:left-12 top-1/2 transform -translate-y-1/2 z-20 w-14 h-14 rounded-full border-2 border-[#ebc280] text-[#ebc280] hover:bg-[#ebc280] hover:text-black transition-all duration-300 flex items-center justify-center backdrop-blur-sm bg-black/30"
+            className={`absolute top-1/2 transform -translate-y-1/2 z-20 rounded-full border-2 border-[#ebc280] text-[#ebc280] hover:bg-[#ebc280] hover:text-black transition-all duration-300 flex items-center justify-center backdrop-blur-sm bg-black/30 ${
+              windowWidth < 768 ? 'left-2 w-10 h-10' : 'left-4 md:left-12 w-14 h-14'
+            }`}
           >
-            <ChevronLeft size={28} />
+            <ChevronLeft size={windowWidth < 768 ? 20 : 28} />
           </button>
-          
+
           <button
             onClick={next}
-            className="absolute right-4 md:right-12 top-1/2 transform -translate-y-1/2 z-20 w-14 h-14 rounded-full border-2 border-[#ebc280] text-[#ebc280] hover:bg-[#ebc280] hover:text-black transition-all duration-300 flex items-center justify-center backdrop-blur-sm bg-black/30"
+            className={`absolute top-1/2 transform -translate-y-1/2 z-20 rounded-full border-2 border-[#ebc280] text-[#ebc280] hover:bg-[#ebc280] hover:text-black transition-all duration-300 flex items-center justify-center backdrop-blur-sm bg-black/30 ${
+              windowWidth < 768 ? 'right-2 w-10 h-10' : 'right-4 md:right-12 w-14 h-14'
+            }`}
           >
-            <ChevronRight size={28} />
+            <ChevronRight size={windowWidth < 768 ? 20 : 28} />
           </button>
         </div>
 

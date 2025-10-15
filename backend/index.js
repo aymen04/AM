@@ -6,8 +6,12 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import TelegramBot from 'node-telegram-bot-api';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 console.log('PORT:', process.env.PORT);
 console.log('MYSQL_URL:', process.env.MYSQL_URL);
@@ -30,13 +34,12 @@ app.use(
   })
 );
 
-// Serve static uploads
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+// -------------------- UPLOADS --------------------
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Configure multer for uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(process.cwd(), 'uploads');
+    const uploadDir = path.join(__dirname, 'uploads');
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
@@ -55,7 +58,7 @@ const upload = multer({
   },
 });
 
-// Database pool
+// -------------------- DATABASE --------------------
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -64,39 +67,27 @@ const pool = mysql.createPool({
   port: process.env.DB_PORT || 3306,
 });
 
-// Telegram Bot
+// -------------------- TELEGRAM --------------------
 const botToken = '7850697198:AAHascQf-eyxVbXkledm4PuWvBFrElenu1g';
 const chatId = '907009445';
 const bot = new TelegramBot(botToken, { polling: false });
 
-// -------------------- PRODUCTS --------------------
+// -------------------- ROUTES API --------------------
 
-// Get all products
+// --- Products ---
 app.get('/products', async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      'SELECT id, name, price, category, images, description, stock, created_at FROM products'
-    );
-
+    const [rows] = await pool.query('SELECT id, name, price, category, images, description, stock, created_at FROM products');
     rows.forEach(row => {
       if (typeof row.images === 'string') {
         let imagesArray = [];
-        try {
-          imagesArray = JSON.parse(row.images);
-        } catch {
-          imagesArray = [row.images];
-        }
-
-        // Convertir les chemins d'images en URLs complètes
+        try { imagesArray = JSON.parse(row.images); } catch { imagesArray = [row.images]; }
         row.images = imagesArray.map(img => {
-          if (img.startsWith('data:image')) return img;
-          if (img.startsWith('http')) return img;
-          // Pour les images uploadées, construire l'URL complète
+          if (img.startsWith('data:image') || img.startsWith('http')) return img;
           return `https://am-wniz.onrender.com/uploads/${img}`;
         });
       }
     });
-
     res.json(rows);
   } catch (error) {
     console.error('Erreur récupération produits :', error);
@@ -104,14 +95,10 @@ app.get('/products', async (req, res) => {
   }
 });
 
-
-
-// Create product
+// --- Create / Update / Delete Products ---
 app.post('/products', async (req, res) => {
   const { name, price, images, category, description, stock } = req.body;
-  if (!name || !price || !images || !Array.isArray(images))
-    return res.status(400).json({ error: 'Missing required fields' });
-
+  if (!name || !price || !images || !Array.isArray(images)) return res.status(400).json({ error: 'Missing required fields' });
   try {
     const [result] = await pool.query(
       'INSERT INTO products (name, price, images, category, description, stock) VALUES (?, ?, ?, ?, ?, ?)',
@@ -124,13 +111,10 @@ app.post('/products', async (req, res) => {
   }
 });
 
-// Update product
 app.put('/products/:id', async (req, res) => {
   const { id } = req.params;
   const { name, price, images, category, description, stock } = req.body;
-  if (!name || !price || !images || !Array.isArray(images))
-    return res.status(400).json({ error: 'Missing required fields' });
-
+  if (!name || !price || !images || !Array.isArray(images)) return res.status(400).json({ error: 'Missing required fields' });
   try {
     await pool.query(
       'UPDATE products SET name = ?, price = ?, images = ?, category = ?, description = ?, stock = ? WHERE id = ?',
@@ -143,7 +127,6 @@ app.put('/products/:id', async (req, res) => {
   }
 });
 
-// Delete product
 app.delete('/products/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -156,20 +139,16 @@ app.delete('/products/:id', async (req, res) => {
   }
 });
 
-// -------------------- CONTACT --------------------
+// --- Contact ---
 app.post('/contact', upload.single('image'), async (req, res) => {
   try {
     const { prenom, nom, telephone, description } = req.body;
     const imagePath = req.file ? req.file.path : null;
-
-    if (!prenom || !nom || !telephone || !description)
-      return res.status(400).json({ error: 'Tous les champs requis doivent être remplis' });
-
+    if (!prenom || !nom || !telephone || !description) return res.status(400).json({ error: 'Tous les champs requis doivent être remplis' });
     const [result] = await pool.query(
       'INSERT INTO contact_requests (prenom, nom, telephone, description, image_path) VALUES (?, ?, ?, ?, ?)',
       [prenom, nom, telephone, description, imagePath]
     );
-
     res.json({ message: 'Demande de contact envoyée avec succès', id: result.insertId });
   } catch (error) {
     console.error(error);
@@ -177,21 +156,17 @@ app.post('/contact', upload.single('image'), async (req, res) => {
   }
 });
 
-// -------------------- CUSTOM ORDERS --------------------
+// --- Custom Orders ---
 app.post('/custom-orders', upload.array('images', 10), async (req, res) => {
   try {
     const { name, email, phone, projectType, budget, description, inspiration, deadline } = req.body;
-    if (!name || !email || !projectType || !description)
-      return res.status(400).json({ error: 'Champs requis manquants' });
-
+    if (!name || !email || !projectType || !description) return res.status(400).json({ error: 'Champs requis manquants' });
     const imagePaths = req.files ? req.files.map(file => file.path) : [];
-
     const [result] = await pool.query(
       'INSERT INTO custom_orders (name, email, phone, project_type, budget, description, inspiration, deadline, images) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [name, email, phone, projectType, budget, description, inspiration, deadline, JSON.stringify(imagePaths)]
     );
 
-    // Telegram notification
     const message = `
 🔔 Nouvelle commande personnalisée !
 👤 Nom: ${name}
@@ -250,6 +225,13 @@ app.delete('/custom-orders/:id', async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Erreur serveur' });
   }
+});
+
+// -------------------- SERVE REACT BUILD --------------------
+app.use(express.static(path.join(__dirname, 'dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 // -------------------- START SERVER --------------------
