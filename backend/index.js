@@ -13,8 +13,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log('PORT:', process.env.PORT);
-console.log('MYSQL_URL:', process.env.MYSQL_URL);
+
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -228,10 +227,10 @@ app.delete('/custom-orders/:id', async (req, res) => {
 });
 
 // -------------------- SERVE REACT BUILD --------------------
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, '..', 'dist')));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });
 
 // -------------------- START SERVER --------------------
