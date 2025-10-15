@@ -230,6 +230,13 @@ app.delete('/custom-orders/:id', async (req, res) => {
 app.use(express.static(path.join(__dirname, '..', 'dist')));
 
 app.get('*', (req, res) => {
+  // Skip API routes
+  if (req.path.startsWith('/products') ||
+      req.path.startsWith('/custom-orders') ||
+      req.path.startsWith('/contact') ||
+      req.path.startsWith('/uploads')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
   res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });
 
