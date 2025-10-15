@@ -86,9 +86,11 @@ app.get('/products', async (req, res) => {
         } catch {
           imagesArray = [row.images];
         }
-        row.images = imagesArray.map(fileName =>
-          `https://am-wniz.onrender.com/uploads/${path.basename(fileName)}`
-        );
+
+        row.images = imagesArray.map(base64String => {
+          if (base64String.startsWith('data:image')) return base64String;
+          return `data:image/jpeg;base64,${base64String}`;
+        });
       }
     });
 
@@ -98,6 +100,7 @@ app.get('/products', async (req, res) => {
     res.status(500).json({ error: 'Database error' });
   }
 });
+
 
 // Create product
 app.post('/products', async (req, res) => {

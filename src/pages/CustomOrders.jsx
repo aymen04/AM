@@ -42,52 +42,36 @@ export default function CustomOrders() {
     e.preventDefault();
     setSubmitStatus('loading');
 
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('phone', formData.phone);
-      formDataToSend.append('projectType', formData.projectType);
-      formDataToSend.append('budget', formData.budget);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('inspiration', formData.inspiration);
-      formDataToSend.append('deadline', formData.deadline);
+    // Simulate API call delay
+    setTimeout(() => {
+      console.log('Custom order submitted:', { formData, images });
 
-      // Add uploaded images
-      images.forEach((img, index) => {
-        formDataToSend.append('images', img.file);
+      // Store in localStorage for demo purposes
+      const existingOrders = JSON.parse(localStorage.getItem('customOrders') || '[]');
+      const newOrder = {
+        id: Date.now(),
+        ...formData,
+        images: images.map(img => img.name),
+        created_at: new Date().toISOString()
+      };
+      existingOrders.push(newOrder);
+      localStorage.setItem('customOrders', JSON.stringify(existingOrders));
+
+      setSubmitStatus('success');
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        projectType: '',
+        budget: '',
+        description: '',
+        inspiration: '',
+        deadline: ''
       });
-
-      const response = await fetch('https://am-wniz.onrender.com/custom-orders', {
-        method: 'POST',
-        body: formDataToSend,
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSubmitStatus('success');
-        // Reset form
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          projectType: '',
-          budget: '',
-          description: '',
-          inspiration: '',
-          deadline: ''
-        });
-        setImages([]);
-        setTimeout(() => setSubmitStatus(''), 3000);
-      } else {
-        throw new Error(result.error || 'Erreur lors de l\'envoi');
-      }
-    } catch (error) {
-      console.error('Erreur:', error);
-      setSubmitStatus('error');
+      setImages([]);
       setTimeout(() => setSubmitStatus(''), 3000);
-    }
+    }, 1000);
   };
 
   useEffect(() => {

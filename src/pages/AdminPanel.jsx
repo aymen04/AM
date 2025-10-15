@@ -16,17 +16,12 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
 
   useEffect(() => {
     setIsAdmin(true);
-    fetchCustomOrders();
+    loadCustomOrders();
   }, []);
 
-  const fetchCustomOrders = async () => {
-    try {
-      const response = await fetch('https://am-wniz.onrender.com/custom-orders');
-      const data = await response.json();
-      setCustomOrders(data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des commandes:', error);
-    }
+  const loadCustomOrders = () => {
+    const storedOrders = JSON.parse(localStorage.getItem('customOrders') || '[]');
+    setCustomOrders(storedOrders);
   };
 
 
@@ -93,18 +88,13 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
   const addProductsViaAPI = async (productsToAdd) => {
     setLoading(true);
     try {
-      const promises = productsToAdd.map(product =>
-        fetch('https://am-wniz.onrender.com/backend/products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(product)
-        })
-      );
-      await Promise.all(promises);
-      // Refetch products
-      const response = await fetch('https://am-wniz.onrender.com/backend/products');
-      const updatedProducts = await response.json();
-      setProducts(updatedProducts);
+      // Add products to local state
+      const newProducts = productsToAdd.map((product, index) => ({
+        ...product,
+        id: Date.now() + index,
+        images: product.images || ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop']
+      }));
+      setProducts(prev => [...prev, ...newProducts]);
       alert(`✅ ${productsToAdd.length} produits importés avec succès !`);
     } catch (error) {
       alert('❌ Erreur lors de l\'import');
@@ -133,6 +123,7 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
     }
 
     const newProduct = {
+      id: Date.now(),
       name,
       price,
       category: normalizeCategory(category),
@@ -143,33 +134,21 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
 
     setLoading(true);
     try {
-      const response = await fetch('https://am-wniz.onrender.com/backend/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProduct)
-      });
+      // Add to local state
+      setProducts(prev => [...prev, newProduct]);
 
-      if (response.ok) {
-        // Refetch products
-        const fetchResponse = await fetch('https://am-wniz.onrender.com/backend/products');
-        const updatedProducts = await fetchResponse.json();
-        setProducts(updatedProducts);
+      // Reset le formulaire
+      setName('');
+      setPrice('');
+      setCategory('');
+      setDescription('');
+      setStock('');
+      setImages([]);
+      setShowAddForm(false);
 
-        // Reset le formulaire
-        setName('');
-        setPrice('');
-        setCategory('');
-        setDescription('');
-        setStock('');
-        setImages([]);
-        setShowAddForm(false);
-        
-        alert('✅ Produit ajouté avec succès !');
-      } else {
-        alert('❌ Erreur lors de l\'ajout du produit');
-      }
+      alert('✅ Produit ajouté avec succès !');
     } catch (error) {
-      alert('❌ Erreur réseau');
+      alert('❌ Erreur lors de l\'ajout du produit');
       console.error(error);
     } finally {
       setLoading(false);
@@ -181,23 +160,11 @@ export default function AdminPanel({ products, setProducts, setIsAdmin }) {
     console.log('handleDeleteProduct called with id:', id);
     setLoading(true);
     try {
-      console.log('Sending DELETE request to:', `https://am-wniz.onrender.com/backend/products/${id}`);
-      const response = await fetch(`https://am-wniz.onrender.com/backend/products/${id}`, {
-        method: 'DELETE'
-      });
-      console.log('DELETE response status:', response.status);
-
-      if (response.ok) {
-        // Refetch products
-        const fetchResponse = await fetch('https://am-wniz.onrender.com/backend/products');
-        const updatedProducts = await fetchResponse.json();
-        setProducts(updatedProducts);
-        alert('🗑️ Produit supprimé !');
-      } else {
-        alert('❌ Erreur lors de la suppression');
-      }
+      // Remove from local state
+      setProducts(prev => prev.filter(product => product.id !== id));
+      alert('🗑️ Produit supprimé !');
     } catch (error) {
-      alert('❌ Erreur réseau');
+      alert('❌ Erreur lors de la suppression');
       console.error(error);
     } finally {
       setLoading(false);
@@ -215,39 +182,19 @@ const handleDeleteCustomOrder = async (id) => {
 const confirmDelete = async () => {
   const id = deleteConfirmId;
   setDeleteConfirmId(null); // Ferme la modal
-  
+
   console.log('✅ Confirmation reçue, début de la suppression...');
   setLoading(true);
-  
+
   try {
-    console.log('🚀 Envoi DELETE vers:', `http://localhost:4000/custom-orders/${id}`);
-
-    const response = await fetch(`https://am-wniz.onrender.com/custom-orders/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-
-    console.log('📥 Réponse statut:', response.status);
-    
-    const data = await response.json();
-    console.log('📥 Réponse data:', data);
-
-    if (response.ok) {
-      setCustomOrders(prevOrders => {
-        const newOrders = prevOrders.filter(order => order.id !== id);
-        console.log('✅ Commandes restantes:', newOrders.length);
-        return newOrders;
-      });
-      alert('🗑️ Commande supprimée !');
-    } else {
-      console.error('❌ Erreur serveur:', data);
-      alert(`❌ Erreur: ${data.error || 'Erreur inconnue'}`);
-    }
+    // Remove from local state and localStorage
+    setCustomOrders(prev => prev.filter(order => order.id !== id));
+    const updatedOrders = JSON.parse(localStorage.getItem('customOrders') || '[]').filter(order => order.id !== id);
+    localStorage.setItem('customOrders', JSON.stringify(updatedOrders));
+    alert('🗑️ Commande supprimée !');
   } catch (error) {
-    console.error('❌ Erreur réseau:', error);
-    alert('❌ Erreur réseau: ' + error.message);
+    console.error('❌ Erreur lors de la suppression');
+    alert('❌ Erreur lors de la suppression');
   } finally {
     setLoading(false);
     console.log('🏁 Fin du processus de suppression');
