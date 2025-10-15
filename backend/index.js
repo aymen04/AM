@@ -23,6 +23,10 @@ const bot = new TelegramBot(botToken, { polling: false });
 const app = express();
 const port = process.env.PORT || 4000;
 
+// Middleware to parse JSON bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(
   cors({
     origin: [
